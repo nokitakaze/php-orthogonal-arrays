@@ -1,0 +1,47 @@
+{
+  "name": "nokitakaze/orthogonal_arrays",
+  "description": "Orthogonal array",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Nikita Vetrov",
+      "email": "admin@kanaria.ru",
+      "homepage": "http://kanaria.ru/",
+      "role": "Project lead"
+    }
+  ],
+  "support": {
+    "source": "https://github.com/nokitakaze/php-orthogonal-arrays"
+  },
+  "keywords": [
+    "orthogonal arrays"
+  ],
+  "minimum-stability": "beta",
+  "require": {
+    "php": "^5.4 | ^7.0.9"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.0 | ^5.7"
+  },
+  "scripts": {
+    "test-cl": [
+      "vendor/bin/phpunit test --coverage-clover test/clover.xml --configuration test/phpunit.xml"
+    ],
+    "tests": [
+      "vendor/bin/phpunit test --coverage-clover test/clover.xml --configuration test/phpunit.xml --coverage-html test/html-report"
+    ]
+  },
+  "autoload": {
+    "psr-4": {
+      "NokitaKaze\\OrthogonalArrays\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "NokitaKaze\\OrthogonalArrays\\Test\\": "test/"
+    }
+  },
+  "config": {
+    "process-timeout": 2400
+  }
+}
