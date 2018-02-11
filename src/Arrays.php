@@ -64,7 +64,8 @@
                     $db_value = self::direct_generateN2($geometry, $iteration_size_limit);
                 }
             }
-            for ($i = 0; $i < count($additional_keys); $i++) {
+            $additional_keys_count = count($additional_keys);
+            for ($i = 0; $i < $additional_keys_count; $i++) {
                 if (empty($db_value)) {
                     $db_value = [[0]];
                 } else {
@@ -74,6 +75,7 @@
                     unset($value);
                 }
             }
+            unset($additional_keys_count);
 
             $real_values = null;
             foreach ($keys as $i => $o) {
@@ -116,9 +118,9 @@
                     $mutation_count = 0;
                     $mutation_count_i = 1;
                     $max_line_select = 1;
-                    for ($i = 1; $i < count($full_mutation_left); $i++) {
-                        $mutation_count_i *= (count($full_mutation_left) + 1 - $i);
-                        $mutation_count_i /= $i;
+                    $full_mutation_left_count = count($full_mutation_left);
+                    for ($i = 1; $i < $full_mutation_left_count; $i++) {
+                        $mutation_count_i = $mutation_count_i * ($full_mutation_left_count + 1 - $i) / $i;
                         $mutation_count += $mutation_count_i;
                         if ($mutation_count > $iteration_size_limit) {
                             break;
@@ -126,7 +128,7 @@
                             $max_line_select = $i;
                         }
                     }
-                    unset($i, $mutation_count, $mutation_count_i);
+                    unset($i, $mutation_count, $mutation_count_i, $full_mutation_left_count);
                 }
 
                 $max_line_select = max(min($max_line_select, count($full_mutation_left) - 1), 1);
@@ -180,7 +182,8 @@
             }
 
             usort($output, function ($a, $b) {
-                for ($i = 0; $i < count($a); $i++) {
+                $a_count = count($a);
+                for ($i = 0; $i < $a_count; $i++) {
                     if ($a[$i] < $b[$i]) {
                         return -1;
                     } elseif ($a[$i] > $b[$i]) {
@@ -195,8 +198,8 @@
         }
 
         /**
-         * @param integer[] $existed
-         * @param integer[] $geometry
+         * @param integer[][] $existed
+         * @param integer[]   $geometry
          *
          * @return integer[][]
          */
@@ -261,7 +264,8 @@
 
                 return;
             }
-            for ($i = $min_index; $i < count($lines); $i++) {
+            $lines_count = count($lines);
+            for ($i = $min_index; $i < $lines_count; $i++) {
                 $this_exist = $exist;
                 $this_exist[] = $lines[$i];
 
@@ -300,7 +304,8 @@
                 }
                 $filtered = [];
 
-                for ($i = 0; $i < count($this_set); $i++) {
+                $this_set_count = count($this_set);
+                for ($i = 0; $i < $this_set_count; $i++) {
                     $u = true;
                     for ($j = 0; $j < $i; $j++) {
                         if (self::compare_chunk($this_set[$i], $this_set[$j])) {
@@ -439,7 +444,8 @@
 
         protected static function get_unique_values(array $values) {
             $unique_values = [];
-            for ($i = 0; $i < count($values[0]); $i++) {
+            $line_width = count($values[0]);
+            for ($i = 0; $i < $line_width; $i++) {
                 $unique_values[] = [];
             }
             foreach ($values as $value) {
