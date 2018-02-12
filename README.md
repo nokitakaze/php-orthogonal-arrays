@@ -3,7 +3,7 @@
 ## Current status
 ### General
 [![Build Status](https://secure.travis-ci.org/nokitakaze/php-orthogonal-arrays.png?branch=master)](http://travis-ci.org/nokitakaze/php-orthogonal-arrays)
-![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nokitakaze/php-orthogonal-arrays/badges/quality-score.png?b=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nokitakaze/php-orthogonal-arrays/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/nokitakaze/php-orthogonal-arrays/)
 ![Code Coverage](https://scrutinizer-ci.com/g/nokitakaze/php-orthogonal-arrays/badges/coverage.png?b=master)
 <!-- [![Latest stable version](https://img.shields.io/packagist/v/nokitakaze/orthogonal_arrays.svg?style=flat-square)](https://packagist.org/packages/nokitakaze/orthogonal_arrays) -->
 
