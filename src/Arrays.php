@@ -111,74 +111,7 @@
 
             $output = [];
             while (!empty($full_mutation_left)) {
-                /**
-                 * @var integer $max_line_select Количество линий, которые добавятся к массиву
-                 */
-                {
-                    $mutation_count = 0;
-                    $mutation_count_i = 1;
-                    $max_line_select = 1;
-                    $full_mutation_left_count = count($full_mutation_left);
-                    for ($i = 1; $i < $full_mutation_left_count; $i++) {
-                        $mutation_count_i = $mutation_count_i * ($full_mutation_left_count + 1 - $i) / $i;
-                        $mutation_count += $mutation_count_i;
-                        if ($mutation_count > $iteration_size_limit) {
-                            break;
-                        } else {
-                            $max_line_select = $i;
-                        }
-                    }
-                    unset($i, $mutation_count, $mutation_count_i, $full_mutation_left_count);
-                }
-
-                $max_line_select = max(min($max_line_select, count($full_mutation_left) - 1), 1);
-
-                $sets = [];
-
-                for ($select_line_count = 1; $select_line_count <= $max_line_select; $select_line_count++) {
-                    $all_lines = self::select_all_lines_permutations($full_mutation_left, $select_line_count);
-                    $best_set = null;
-                    $best_left = null;
-
-                    foreach ($all_lines as $single_lines_set) {
-                        $temporary = array_merge($output, $single_lines_set);
-                        $full_mutation_left_this = self::remove_useless_lines($temporary, $full_mutation_left);
-                        if (is_null($best_left)) {
-                            $best_set = $single_lines_set;
-                            $best_left = $full_mutation_left_this;
-                        } elseif (count($best_left) + count($best_set) >
-                                  count($full_mutation_left_this) + count($single_lines_set)) {
-                            $best_set = $single_lines_set;
-                            $best_left = $full_mutation_left_this;
-                        }
-                    }
-
-                    $sets[$select_line_count] = [$best_set, $best_left];
-                }
-                unset($best_left, $best_set, $select_line_count, $all_lines,
-                    $max_line_select, $temporary, $single_lines_set);
-                usort($sets, function ($set1, $set2) {
-                    $v1 = count($set1[0]) + count($set1[1]);
-                    $v2 = count($set2[0]) + count($set2[1]);
-                    if ($v1 < $v2) {
-                        return -1;
-                    } elseif ($v1 > $v2) {
-                        return 1;
-                    } else {
-                        return (count($set1[0]) > count($set1[1])) ? -1 : 1;
-                    }
-                });
-                list($best_set, $best_left) = $sets[array_keys($sets)[0]];
-
-                if (is_null($best_set)) {
-                    // @codeCoverageIgnoreStart
-                    throw new OrthogonalArraysException("Code flow Exception");
-                    // @codeCoverageIgnoreEnd
-                }
-                foreach ($best_set as $line) {
-                    $output[] = $line;
-                }
-                $full_mutation_left = $best_left;
+                self::direct_generateN2_iteration($full_mutation_left, $output, $iteration_size_limit);
             }
 
             usort($output, function ($a, $b) {
@@ -195,6 +128,94 @@
             });
 
             return $output;
+        }
+
+        /**
+         * @param integer $full_mutation_left_count
+         * @param integer $iteration_size_limit
+         *
+         * @return integer
+         */
+        protected static function get_max_line_select($full_mutation_left_count, $iteration_size_limit) {
+            $mutation_count = 0;
+            $mutation_count_i = 1;
+            $max_line_select = 1;
+            for ($i = 1; $i < $full_mutation_left_count; $i++) {
+                $mutation_count_i = $mutation_count_i * ($full_mutation_left_count + 1 - $i) / $i;
+                $mutation_count += $mutation_count_i;
+                if ($mutation_count > $iteration_size_limit) {
+                    break;
+                } else {
+                    $max_line_select = $i;
+                }
+            }
+
+            return $max_line_select;
+        }
+
+        /**
+         * @param integer[][] $full_mutation_left
+         * @param integer[][] $output
+         * @param integer     $iteration_size_limit
+         *
+         * @throws OrthogonalArraysException
+         */
+        protected static function direct_generateN2_iteration(
+            array &$full_mutation_left,
+            array &$output,
+            $iteration_size_limit) {
+            /**
+             * @var integer $max_line_select Количество линий, которые добавятся к массиву
+             */
+            $max_line_select = self::get_max_line_select(count($full_mutation_left), $iteration_size_limit);
+            $max_line_select = max(min($max_line_select, count($full_mutation_left) - 1), 1);
+
+            $sets = [];
+
+            for ($select_line_count = 1; $select_line_count <= $max_line_select; $select_line_count++) {
+                $all_lines = self::select_all_lines_permutations($full_mutation_left, $select_line_count);
+                $best_set = null;
+                $best_left = null;
+
+                foreach ($all_lines as $single_lines_set) {
+                    $temporary = array_merge($output, $single_lines_set);
+                    $full_mutation_left_this = self::remove_useless_lines($temporary, $full_mutation_left);
+                    if (is_null($best_left)) {
+                        $best_set = $single_lines_set;
+                        $best_left = $full_mutation_left_this;
+                    } elseif (count($best_left) + count($best_set) >
+                              count($full_mutation_left_this) + count($single_lines_set)) {
+                        $best_set = $single_lines_set;
+                        $best_left = $full_mutation_left_this;
+                    }
+                }
+
+                $sets[$select_line_count] = [$best_set, $best_left];
+            }
+            unset($best_left, $best_set, $select_line_count, $all_lines,
+                $max_line_select, $temporary, $single_lines_set);
+            usort($sets, function ($set1, $set2) {
+                $v1 = count($set1[0]) + count($set1[1]);
+                $v2 = count($set2[0]) + count($set2[1]);
+                if ($v1 < $v2) {
+                    return -1;
+                } elseif ($v1 > $v2) {
+                    return 1;
+                } else {
+                    return (count($set1[0]) > count($set1[1])) ? -1 : 1;
+                }
+            });
+            list($best_set, $best_left) = $sets[array_keys($sets)[0]];
+
+            if (is_null($best_set)) {
+                // @codeCoverageIgnoreStart
+                throw new OrthogonalArraysException("Code flow Exception");
+                // @codeCoverageIgnoreEnd
+            }
+            foreach ($best_set as $line) {
+                $output[] = $line;
+            }
+            $full_mutation_left = $best_left;
         }
 
         /**
