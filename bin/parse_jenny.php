@@ -33,7 +33,7 @@
         return generate_mutations($existed, $depth - 1, $count_per_iteration);
     }
 
-    function generate_complex($count, $count_per_iteration) {
+    function generate_complex($count, $count_per_iteration, &$external_db) {
         $mutations = generate_mutations([], $count, $count_per_iteration);
         $output_buf = [];
 
@@ -89,82 +89,32 @@
             });
 
             $hash = implode('-', $mutation);
-            $output_buf[] = sprintf("                '%s' => '%s',",
-                $hash, implode(',', $pairwise_lines));
+            if (!isset($external_db[$count])) {
+                $external_db[$count] = [];
+            }
+            $external_db[$count][$hash] = implode(',', $pairwise_lines);
         }
 
         return implode("\n", $output_buf);
     }
 
-    $strings = [];
+    $external_db = [];
     for ($count = 3; $count <= 7; $count++) {
         $count_per_iteration = 10;
 
         echo "\ncount = {$count}\t";
         /** @noinspection PhpUnhandledExceptionInspection */
-        $string = generate_complex($count, $count_per_iteration);
-        $strings[] = sprintf("%d => [\n%s\n            ],\n", $count, $string);
+        generate_complex($count, $count_per_iteration, $external_db);
     }
     for ($count = 8; $count <= 10; $count++) {
         $count_per_iteration = 4;
 
         echo "\ncount = {$count}\t";
         /** @noinspection PhpUnhandledExceptionInspection */
-        $string = generate_complex($count, $count_per_iteration);
-        $strings[] = sprintf("%d => [\n%s\n            ],\n", $count, $string);
+        generate_complex($count, $count_per_iteration, $external_db);
     }
 
-    file_put_contents(__DIR__.'/../src/ArraysDB.php', '<?php
-
-    namespace NokitaKaze\OrthogonalArrays;
-
-    abstract class ArraysDB {
-        private static $_db = [
-            '.implode("\n            ", $strings).'
-        ];
-
-        /**
-         * @param integer[] $geometry
-         *
-         * @return integer[][]|null
-         * @throws OrthogonalArraysException
-         */
-        public static function get_array($geometry) {
-            $count = count($geometry);
-            if (!isset(self::$_db[$count])) {
-                return null;
-            }
-
-            $hash = implode(\'-\', $geometry);
-            if (!isset(self::$_db[$count][$hash])) {
-                return null;
-            }
-
-            $indexes = explode(\',\', self::$_db[$count][$hash]);
-            $pairs = [];
-            foreach ($indexes as $s) {
-                $value = [];
-                while (!empty($s)) {
-                    $c = substr($s, 0, 1);
-                    $s = substr($s, 1);
-                    $ord = ord($c);
-                    if (($ord >= ord(\'a\')) and ($ord <= ord(\'z\'))) {
-                        $value[] = $ord - ord(\'a\');
-                    } elseif (($ord >= ord(\'A\')) and ($ord <= ord(\'Z\'))) {
-                        $value[] = $ord - ord(\'A\') + 26;
-                    } else {
-                        throw new OrthogonalArraysException();
-                    }
-                }
-                $pairs[] = $value;
-            }
-
-            return $pairs;
-        }
-
-    }
-
-?>');
+    file_put_contents(__DIR__.'/../src/precomputed.dat', serialize($external_db), LOCK_EX);
 
     echo "\n\ndone\n";
 ?>
